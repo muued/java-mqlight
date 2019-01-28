@@ -29,6 +29,7 @@ import com.ibm.mqlight.api.endpoint.EndpointService;
 import com.ibm.mqlight.api.impl.NonBlockingClientImpl;
 import com.ibm.mqlight.api.network.NetworkService;
 import com.ibm.mqlight.api.timer.TimerService;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 /**
  * A Java MQ Light client implementation that never blocks the calling thread when
@@ -180,7 +181,7 @@ public abstract class NonBlockingClient {
      * Sends a string message to a topic.
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the string data to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -200,14 +201,14 @@ public abstract class NonBlockingClient {
      * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      */
-    public abstract <T> boolean send(String topic, String data, Map<String, Object> properties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+    public abstract <T> boolean send(String topic, String data, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
     throws StoppedException, IllegalArgumentException;
 
     /**
      * Sends a <code>ByteBuffer</code> to a topic.
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the byte buffer to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -227,8 +228,38 @@ public abstract class NonBlockingClient {
      * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      */
-    public abstract <T> boolean send(String topic, ByteBuffer data, Map<String, Object> properties, SendOptions sendOptions, CompletionListener<T> listener, T context)
-    throws StoppedException, IllegalArgumentException;
+    public <T> boolean send(String topic, ByteBuffer data, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+            throws StoppedException, IllegalArgumentException {
+        return send(topic, data, (Properties)null, applicationProperties, sendOptions, listener, context);
+    }
+
+    /**
+     * Sends a <code>ByteBuffer</code> to a topic.
+     * @param topic the topic to send the message to. Cannot be null.
+     * @param data the byte buffer to send to the topic. Cannot be null.
+     * @param properties message properties.
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
+     *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
+     *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
+     *                   <code>byte[]</code>, and <code>String</code>.
+     * @param sendOptions a set of options that determine exactly how the send operation works.
+     * @param listener a listener object that is notified when the send operation completes.  For 'at most once' quality of
+     *                 service messages, this is notified (of success) when the message has been flushed to the network.
+     *                 For 'at least once' quality of service messages, this is notified (of success) when receipt of the
+     *                 message has been confirmed by the service.
+     * @param context a context object that is passed into the listener.  This can be used within the listener code to
+     *                identify the specific instance of the send method relating to the listener invocation.
+     * @param <T> the type of the context, used to propagate an arbitrary object between method calls on an
+     *            instance of this object, and the various listeners that are used to provide notification
+     *            of client related events.
+     * @return a <code>boolean</code> <code>true</code> if the message was sent
+     *         immediately, or <code>false</code> if the message was buffered in
+     *         memory due to a backlog of messages to send over the network)
+     * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
+     * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
+     */
+    public abstract <T> boolean send(String topic, ByteBuffer data, Properties properties, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+            throws StoppedException, IllegalArgumentException;
 
     /**
      * Sends a JSON object to a topic.
@@ -236,7 +267,7 @@ public abstract class NonBlockingClient {
      * @param json the object to send as a JSON object.  The send method will convert this object to JSON using the
      *             Google Gson library to convert the object to JSON (essentially calling {@link Gson#toJson(Object)} to
      *             perform the conversion).
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -256,7 +287,7 @@ public abstract class NonBlockingClient {
      * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      */
-    public abstract <T> boolean send(String topic, Object json, Map<String, Object> properties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+    public abstract <T> boolean send(String topic, Object json, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
             throws StoppedException, IllegalArgumentException;
 
     /**
@@ -267,7 +298,7 @@ public abstract class NonBlockingClient {
      *             perform the conversion).
      * @param type provides type information about the <code>json</code> object.  This allows Java types that make use of
      *             Java Generics to be converted to JSON.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -287,7 +318,7 @@ public abstract class NonBlockingClient {
      * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      */
-    public abstract <T> boolean send(String topic, Object json, Type type, Map<String, Object> properties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+    public abstract <T> boolean send(String topic, Object json, Type type, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
             throws StoppedException, IllegalArgumentException;
 
     /**
@@ -296,7 +327,7 @@ public abstract class NonBlockingClient {
      * @param topic the topic to send the message to. Cannot be null.
      * @param json a String which is assumed to contain JSON information.  No checking is performed on this string, it is
      *             simply transferred as the body of a message which the appropriate
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -316,14 +347,14 @@ public abstract class NonBlockingClient {
      * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      */
-    public abstract <T> boolean sendJson(String topic, String json, Map<String, Object> properties, SendOptions sendOptions, CompletionListener<T> listener, T context)
+    public abstract <T> boolean sendJson(String topic, String json, Map<String, Object> applicationProperties, SendOptions sendOptions, CompletionListener<T> listener, T context)
             throws StoppedException, IllegalArgumentException;
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, data, properties, SendOptions.builder().build(), listener, context)</code>
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), listener, context)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the string data to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -343,17 +374,17 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, String, Map, SendOptions, CompletionListener, Object)
      */
-    public <T> boolean send(String topic, String data, Map<String, Object> properties, CompletionListener<T> listener, T context)
+    public <T> boolean send(String topic, String data, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
     throws StoppedException, IllegalArgumentException {
-        return send(topic, data, properties, defaultSendOptions, listener, context);
+        return send(topic, data, applicationProperties, defaultSendOptions, listener, context);
     }
 
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, data, properties, SendOptions.builder().build(), listener, context)</code>
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), listener, context)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the byte buffer to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -373,19 +404,50 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, ByteBuffer, Map, SendOptions, CompletionListener, Object)
      */
-    public <T> boolean send(String topic, ByteBuffer data, Map<String, Object> properties, CompletionListener<T> listener, T context)
-    throws StoppedException, IllegalArgumentException {
-        return send(topic, data, properties, defaultSendOptions, listener, context);
+    public <T> boolean send(String topic, ByteBuffer data, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
+            throws StoppedException, IllegalArgumentException {
+        return send(topic, data, applicationProperties, defaultSendOptions, listener, context);
+    }
+
+    /**
+     * Send a message to the MQ Light server.  This is equivalent to calling:
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), listener, context)</code>
+     * @param topic the topic to send the message to. Cannot be null.
+     * @param data the byte buffer to send to the topic. Cannot be null.
+     * @param properties message properties.
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
+     *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
+     *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
+     *                   <code>byte[]</code>, and <code>String</code>.
+     * @param listener a listener object that is notified when the send operation completes.  For 'at most once' quality of
+     *                 service messages, this is notified (of success) when the message has been flushed to the network.
+     *                 For 'at least once' quality of service messages, this is notified (of success) when receipt of the
+     *                 message has been confirmed by the service.
+     * @param context a context object that is passed into the listener.  This can be used within the listener code to
+     *                identify the specific instance of the send method relating to the listener invocation.
+     * @param <T> the type of the context, used to propagate an arbitrary object between method calls on an
+     *            instance of this object, and the various listeners that are used to provide notification
+     *            of client related events.
+     * @return a <code>boolean</code> <code>true</code> if the message was sent
+     *         immediately, or <code>false</code> if the message was buffered in
+     *         memory due to a backlog of messages to send over the network)
+     * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
+     * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
+     * @see NonBlockingClient#send(String, ByteBuffer, Map, SendOptions, CompletionListener, Object)
+     */
+    public <T> boolean send(String topic, ByteBuffer data, Properties properties, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
+            throws StoppedException, IllegalArgumentException {
+        return send(topic, data, properties, applicationProperties, defaultSendOptions, listener, context);
     }
 
     /**
      * Sends a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, json, properties, SendOptions.builder().build(), listener, context)</code>
+     * <code>send(topic, json, applicationProperties, SendOptions.builder().build(), listener, context)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param json the object to send as a JSON object.  The send method will convert this object to JSON using the
      *             Google Gson library to convert the object to JSON (essentially calling {@link Gson#toJson(Object, Type)} to
      *             perform the conversion).
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -405,21 +467,21 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, Object, Map, SendOptions, CompletionListener, Object)
      */
-    public <T> boolean send(String topic, Object json, Map<String, Object> properties, CompletionListener<T> listener, T context)
+    public <T> boolean send(String topic, Object json, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
     throws StoppedException, IllegalArgumentException {
-        return send(topic, json, properties, defaultSendOptions, listener, context);
+        return send(topic, json, applicationProperties, defaultSendOptions, listener, context);
     }
 
     /**
      * Sends a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, json, type, properties, SendOptions.builder().build(), listener, context)</code>
+     * <code>send(topic, json, type, applicationProperties, SendOptions.builder().build(), listener, context)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param json the object to send as a JSON object.  The send method will convert this object to JSON using the
      *             Google Gson library to convert the object to JSON (essentially calling {@link Gson#toJson(Object, Type)} to
      *             perform the conversion).
      * @param type provides type information about the <code>json</code> object.  This allows Java types that make use of
      *             Java Generics to be converted to JSON.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -439,18 +501,18 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, Object, Type, Map, SendOptions, CompletionListener, Object)
      */
-    public <T> boolean send(String topic, Object json, Type type, Map<String, Object> properties, CompletionListener<T> listener, T context)
+    public <T> boolean send(String topic, Object json, Type type, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
     throws StoppedException, IllegalArgumentException {
-        return send(topic, json, type, properties, defaultSendOptions, listener, context);
+        return send(topic, json, type, applicationProperties, defaultSendOptions, listener, context);
     }
 
     /**
      * Sends a message to the MQ Light server.  This is equivalent to calling:
-     * <code>sendJson(topic, json, properties, SendOptions.builder().build(), listener, context)</code>
+     * <code>sendJson(topic, json, applicationProperties, SendOptions.builder().build(), listener, context)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param json a String which is assumed to contain JSON information.  No checking is performed on this string, it is
      *             simply transferred as the body of a message which the appropriate
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -470,17 +532,17 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#sendJson(String, String, Map, SendOptions, CompletionListener, Object)
      */
-    public <T> boolean sendJson(String topic, String json, Map<String, Object> properties, CompletionListener<T> listener, T context)
+    public <T> boolean sendJson(String topic, String json, Map<String, Object> applicationProperties, CompletionListener<T> listener, T context)
     throws StoppedException, IllegalArgumentException {
-        return sendJson(topic, json, properties, defaultSendOptions, listener, context);
+        return sendJson(topic, json, applicationProperties, defaultSendOptions, listener, context);
     }
 
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, data, properties, SendOptions.builder().build(), null, null)</code>
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), null, null)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the string data to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -491,16 +553,16 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, String, Map, SendOptions, CompletionListener, Object)
      */
-    public boolean send(String topic, String data, Map<String, Object> properties) throws StoppedException, IllegalArgumentException {
-        return send(topic, data, properties, defaultSendOptions, null, null);
+    public boolean send(String topic, String data, Map<String, Object> applicationProperties) throws StoppedException, IllegalArgumentException {
+        return send(topic, data, applicationProperties, defaultSendOptions, null, null);
     }
 
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, data, properties, SendOptions.builder().build(), null, null)</code>
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), null, null)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param data the byte buffer to send to the topic. Cannot be null.
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -511,18 +573,39 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, ByteBuffer, Map, SendOptions, CompletionListener, Object)
      */
-    public boolean send(String topic, ByteBuffer data, Map<String, Object> properties) throws StoppedException, IllegalArgumentException {
-        return send(topic, data, properties, defaultSendOptions, null, null);
+    public boolean send(String topic, ByteBuffer data, Map<String, Object> applicationProperties) throws StoppedException, IllegalArgumentException {
+        return send(topic, data, applicationProperties, defaultSendOptions, null, null);
     }
 
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, json, properties, SendOptions.builder().build(), null, null)</code>
+     * <code>send(topic, data, applicationProperties, SendOptions.builder().build(), null, null)</code>
+     * @param topic the topic to send the message to. Cannot be null.
+     * @param data the byte buffer to send to the topic. Cannot be null.
+     * @param properties message properties.
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
+     *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
+     *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
+     *                   <code>byte[]</code>, and <code>String</code>.
+     * @return a <code>boolean</code> <code>true</code> if the message was sent
+     *         immediately, or <code>false</code> if the message was buffered in
+     *         memory due to a backlog of messages to send over the network)
+     * @throws StoppedException if the client is in stopped or stopping state when this method is invoked.
+     * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
+     * @see NonBlockingClient#send(String, ByteBuffer, Map, SendOptions, CompletionListener, Object)
+     */
+    public boolean send(String topic, ByteBuffer data, Properties properties, Map<String, Object> applicationProperties) throws StoppedException, IllegalArgumentException {
+        return send(topic, data, properties, applicationProperties, defaultSendOptions, null, null);
+    }
+
+    /**
+     * Send a message to the MQ Light server.  This is equivalent to calling:
+     * <code>send(topic, json, applicationProperties, SendOptions.builder().build(), null, null)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param json the object to send as a JSON object.  The send method will convert this object to JSON using the
      *             Google Gson library to convert the object to JSON (essentially calling {@link Gson#toJson(Object)} to
      *             perform the conversion).
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -533,8 +616,8 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#send(String, Object, Map, SendOptions, CompletionListener, Object)
      */
-    public boolean send(String topic, Object json, Map<String, Object> properties) throws StoppedException, IllegalArgumentException {
-        return send(topic, json, properties, defaultSendOptions, null, null);
+    public boolean send(String topic, Object json, Map<String, Object> applicationProperties) throws StoppedException, IllegalArgumentException {
+        return send(topic, json, applicationProperties, defaultSendOptions, null, null);
     }
 
     /**
@@ -563,11 +646,11 @@ public abstract class NonBlockingClient {
 
     /**
      * Send a message to the MQ Light server.  This is equivalent to calling:
-     * <code>send(topic, json, properties, SendOptions.builder().build(), null, null)</code>
+     * <code>send(topic, json, applicationProperties, SendOptions.builder().build(), null, null)</code>
      * @param topic the topic to send the message to. Cannot be null.
      * @param json a String which is assumed to contain JSON information.  No checking is performed on this string, it is
      *             simply transferred as the body of a message which the appropriate
-     * @param properties a {@link Map} of properties that will be carried alongside the message.  Keys must be non-null and values
+     * @param applicationProperties a {@link Map} of applicationProperties that will be carried alongside the message.  Keys must be non-null and values
      *                   must be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *                   <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *                   <code>byte[]</code>, and <code>String</code>.
@@ -578,8 +661,8 @@ public abstract class NonBlockingClient {
      * @throws IllegalArgumentException if an invalid value is specified for one of the arguments.
      * @see NonBlockingClient#sendJson(String, String, Map, SendOptions, CompletionListener, Object)
      */
-    public boolean sendJson(String topic, String json, Map<String, Object> properties) throws StoppedException, IllegalArgumentException {
-        return sendJson(topic, json, properties, defaultSendOptions, null, null);
+    public boolean sendJson(String topic, String json, Map<String, Object> applicationProperties) throws StoppedException, IllegalArgumentException {
+        return sendJson(topic, json, applicationProperties, defaultSendOptions, null, null);
     }
 
     /**

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import junit.framework.AssertionFailedError;
 
+import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.junit.Test;
 
 public class TestNonBlockingClient {
@@ -71,45 +72,45 @@ public class TestNonBlockingClient {
 
         @Override
         public <T> boolean send(String topic, String data,
-                Map<String, Object> properties, SendOptions sendOptions,
-                CompletionListener<T> listener, T context)
+                                Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                CompletionListener<T> listener, T context)
                 throws StateException {
-            testAgainstExpectedValues(new Object[] {"send", topic, data, properties, sendOptions, listener, context});
+            testAgainstExpectedValues(new Object[] {"send", topic, data, applicationProperties, sendOptions, listener, context});
             return false;
         }
 
         @Override
-        public <T> boolean send(String topic, ByteBuffer data,
-                Map<String, Object> properties, SendOptions sendOptions,
-                CompletionListener<T> listener, T context)
+        public <T> boolean send(String topic, ByteBuffer data, Properties properties,
+                                Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                CompletionListener<T> listener, T context)
                 throws StateException {
-            testAgainstExpectedValues(new Object[] {"send", topic, data, properties, sendOptions, listener, context});
+            testAgainstExpectedValues(new Object[] {"send", topic, data, properties, applicationProperties, sendOptions, listener, context});
             return false;
         }
 
         @Override
         public <T> boolean send(String topic, Object json,
-                Map<String, Object> properties, SendOptions sendOptions,
-                CompletionListener<T> listener, T context)
+                                Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                CompletionListener<T> listener, T context)
                 throws StateException {
-            testAgainstExpectedValues(new Object[] {"send", topic, json, properties, sendOptions, listener, context});
+            testAgainstExpectedValues(new Object[] {"send", topic, json, applicationProperties, sendOptions, listener, context});
             return false;
         }
 
         @Override
         public <T> boolean send(String topic, Object json, Type type,
-                Map<String, Object> properties, SendOptions sendOptions,
-                CompletionListener<T> listener, T context)
+                                Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                CompletionListener<T> listener, T context)
                 throws StateException {
-            testAgainstExpectedValues(new Object[] {"send", topic, json, type, properties, sendOptions, listener, context});
+            testAgainstExpectedValues(new Object[] {"send", topic, json, type, applicationProperties, sendOptions, listener, context});
             return false;
         }
         @Override
         public <T> boolean sendJson(String topic, String json,
-                Map<String, Object> properties, SendOptions sendOptions,
-                CompletionListener<T> listener, T context)
+                                    Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                    CompletionListener<T> listener, T context)
                 throws StateException {
-            testAgainstExpectedValues(new Object[] {"sendJson", topic, json, properties, sendOptions, listener, context});
+            testAgainstExpectedValues(new Object[] {"sendJson", topic, json, applicationProperties, sendOptions, listener, context});
             return false;
         }
 

@@ -95,6 +95,7 @@ import com.ibm.mqlight.api.logging.Logger;
 import com.ibm.mqlight.api.logging.LoggerFactory;
 import com.ibm.mqlight.api.network.NetworkService;
 import com.ibm.mqlight.api.timer.TimerService;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 public class NonBlockingClientImpl extends NonBlockingClient implements FSMActions, Component, CallbackService {
 
@@ -273,11 +274,11 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
     }
 
     @Override
-    public <T> boolean send(String topic, String data, Map<String, Object> properties,
+    public <T> boolean send(String topic, String data, Map<String, Object> applicationProperties,
             SendOptions sendOptions, CompletionListener<T> listener, T context)
             throws StoppedException {
         final String methodName = "send";
-        logger.entry(this, methodName, topic, data, properties, sendOptions, listener, context);
+        logger.entry(this, methodName, topic, data, applicationProperties, sendOptions, listener, context);
 
         if (data == null) {
           final IllegalArgumentException exception = new IllegalArgumentException("data cannot be null");
@@ -287,7 +288,7 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
         org.apache.qpid.proton.message.Message protonMsg = Proton.message();
         protonMsg.setBody(new AmqpValue(data));
 
-        final boolean result = send(topic, protonMsg, properties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
+        final boolean result = send(topic, protonMsg, applicationProperties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
 
         logger.exit(this, methodName, result);
 
@@ -295,11 +296,11 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
     }
 
     @Override
-    public <T> boolean send(String topic, ByteBuffer data, Map<String, Object> properties,
-            SendOptions sendOptions, CompletionListener<T> listener, T context)
+    public <T> boolean send(String topic, ByteBuffer data, Properties properties, Map<String, Object> applicationProperties,
+                            SendOptions sendOptions, CompletionListener<T> listener, T context)
             throws StoppedException {
         final String methodName = "send";
-       logger.entry(this, methodName, topic, data, properties, sendOptions, listener, context);
+       logger.entry(this, methodName, topic, data, applicationProperties, sendOptions, listener, context);
 
         if (data == null) {
           final IllegalArgumentException exception = new IllegalArgumentException("data cannot be null");
@@ -312,7 +313,10 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
         data.get(dataBytes);
         data.position(pos);
         protonMsg.setBody(new AmqpValue(new Binary(dataBytes)));
-        final boolean result = send(topic, protonMsg, properties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
+        if (null != properties) {
+            protonMsg.setProperties(properties);
+        }
+        final boolean result = send(topic, protonMsg, applicationProperties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
 
         logger.exit(this, methodName, result);
 
@@ -321,16 +325,16 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
 
     @Override
     public <T> boolean send(String topic, Object json,
-            Map<String, Object> properties, SendOptions sendOptions,
-            CompletionListener<T> listener, T context) throws StoppedException {
+                            Map<String, Object> applicationProperties, SendOptions sendOptions,
+                            CompletionListener<T> listener, T context) throws StoppedException {
         final String methodName = "send";
-        logger.entry(this, methodName, topic, json, properties, sendOptions, listener, context);
+        logger.entry(this, methodName, topic, json, applicationProperties, sendOptions, listener, context);
 
         String jsonString;
         synchronized(gson) {
             jsonString = gson.toJson(json);
         }
-        final boolean result = sendJson(topic, jsonString, properties, sendOptions, listener, context);
+        final boolean result = sendJson(topic, jsonString, applicationProperties, sendOptions, listener, context);
 
         logger.exit(this, methodName, result);
 
@@ -339,16 +343,16 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
 
     @Override
     public <T> boolean send(String topic, Object json, Type type,
-            Map<String, Object> properties, SendOptions sendOptions,
-            CompletionListener<T> listener, T context) throws StoppedException {
+                            Map<String, Object> applicationProperties, SendOptions sendOptions,
+                            CompletionListener<T> listener, T context) throws StoppedException {
         final String methodName = "send";
-        logger.entry(this, methodName, topic, json, type, properties, sendOptions, listener, context);
+        logger.entry(this, methodName, topic, json, type, applicationProperties, sendOptions, listener, context);
 
         String jsonString;
         synchronized(gson) {
             jsonString = gson.toJson(json, type);
         }
-        final boolean result = sendJson(topic, jsonString, properties, sendOptions, listener, context);
+        final boolean result = sendJson(topic, jsonString, applicationProperties, sendOptions, listener, context);
 
         logger.exit(this, methodName, result);
 
@@ -357,16 +361,16 @@ public class NonBlockingClientImpl extends NonBlockingClient implements FSMActio
 
     @Override
     public <T> boolean sendJson(String topic, String json,
-            Map<String, Object> properties, SendOptions sendOptions,
-            CompletionListener<T> listener, T context)
+                                Map<String, Object> applicationProperties, SendOptions sendOptions,
+                                CompletionListener<T> listener, T context)
     throws StoppedException {
         final String methodName = "sendJson";
-        logger.entry(this, methodName, topic, json, properties, sendOptions, listener, context);
+        logger.entry(this, methodName, topic, json, applicationProperties, sendOptions, listener, context);
 
         org.apache.qpid.proton.message.Message protonMsg = Proton.message();
         protonMsg.setBody(new AmqpValue(json));
         protonMsg.setContentType("application/json");
-        final boolean result = send(topic, protonMsg, properties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
+        final boolean result = send(topic, protonMsg, applicationProperties, sendOptions == null ? defaultSendOptions : sendOptions, listener, context);
 
         logger.exit(this, methodName, result);
 
