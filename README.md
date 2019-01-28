@@ -141,7 +141,6 @@ environment variables that can be set to control the logging behavior when
   Callbacks are run on whatever thread needs to call back into application
   code - which is not a good fit for some workloads.
 
--- 
 [maven-url]: https://search.maven.org/#search%7Cga%7C1%7Cmqlight
 [maven-img]: https://img.shields.io/maven-central/v/com.ibm.mqlight/mqlight-api.svg
 [travis-img]: https://travis-ci.org/mqlight/java-mqlight.svg?branch=master
