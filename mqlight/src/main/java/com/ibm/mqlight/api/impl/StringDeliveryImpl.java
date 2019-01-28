@@ -25,24 +25,26 @@ import com.ibm.mqlight.api.StringDelivery;
 import com.ibm.mqlight.api.impl.engine.DeliveryRequest;
 import com.ibm.mqlight.api.logging.Logger;
 import com.ibm.mqlight.api.logging.LoggerFactory;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 class StringDeliveryImpl extends DeliveryImpl implements StringDelivery {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(StringDeliveryImpl.class);
-  
+
     private final String data;
-    
-    protected StringDeliveryImpl(NonBlockingClientImpl client, QOS qos, String share, String topic, 
-                                 String topicPattern, long ttl, String data, Map<String, Object> properties, DeliveryRequest deliveryRequest) {
-        super(client, qos, share, topic, topicPattern, ttl, properties, deliveryRequest);
+
+    protected StringDeliveryImpl(NonBlockingClientImpl client, QOS qos, String share, String topic,
+                                 String topicPattern, long ttl, String data, Properties properties,
+                                 Map<String, Object> applicationProperties, DeliveryRequest deliveryRequest) {
+        super(client, qos, share, topic, topicPattern, ttl, properties, applicationProperties, deliveryRequest);
         final String methodName = "<init>";
         logger.entry(this, methodName, client, qos, share, topic, topicPattern, ttl, data, properties, deliveryRequest);
-        
+
         this.data = data;
-        
+
         logger.exit(this, methodName);
     }
-    
+
     @Override
     public Type getType() {
         return Type.STRING;

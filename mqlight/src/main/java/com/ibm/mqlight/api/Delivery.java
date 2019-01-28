@@ -18,6 +18,8 @@
  */
 package com.ibm.mqlight.api;
 
+import org.apache.qpid.proton.amqp.messaging.Properties;
+
 import java.util.Map;
 
 /**
@@ -84,11 +86,13 @@ public interface Delivery {
      */
     long getTtl();
 
+    Properties getProperties();
+
     /**
      * @return a {@link Map} of properties associated with the message being delivered. Keys will be non-null and values
      *         will be one of the following types: <code>null</code>, <code>Boolean</code>, <code>Byte</code>,
      *         <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>,
      *         <code>byte[]</code>, and <code>String</code>.
      */
-    Map<String, Object> getProperties();
+    Map<String, Object> getApplicationProperties();
 }

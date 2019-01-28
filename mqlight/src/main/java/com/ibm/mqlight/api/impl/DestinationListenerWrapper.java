@@ -30,6 +30,7 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.codec.DecodeException;
 
 import com.google.gson.GsonBuilder;
@@ -122,7 +123,7 @@ class DestinationListenerWrapper<T> {
                     payloadBytes = data;
                 }
 
-                Map<String, Object> properties = new HashMap<>();
+                Map<String, Object> applicationProperties = new HashMap<>();
                 if (malformedReason == null) {
                     Object msgBodyValue = ((AmqpValue)msg.getBody()).getValue();
                     if (msgBodyValue instanceof Binary) {
@@ -149,13 +150,13 @@ class DestinationListenerWrapper<T> {
                             if (entry.getKey() instanceof String) {
                                 Object value = entry.getValue();
                                 if (value == null) {
-                                    properties.put((String)entry.getKey(), null);
+                                    applicationProperties.put((String)entry.getKey(), null);
                                 } else if (value instanceof Binary) {
-                                    properties.put((String)entry.getKey(), ((Binary)value).getArray());
+                                    applicationProperties.put((String)entry.getKey(), ((Binary)value).getArray());
                                 } else {
                                     for (int i = 0; i < NonBlockingClientImpl.validPropertyValueTypes.length; ++i) {
                                         if (NonBlockingClientImpl.validPropertyValueTypes[i].isAssignableFrom(value.getClass())) {
-                                            properties.put((String)entry.getKey(), value);
+                                            applicationProperties.put((String)entry.getKey(), value);
                                         }
                                     }
                                 }
@@ -163,6 +164,8 @@ class DestinationListenerWrapper<T> {
                         }
                     }
                 }
+
+                final Properties properties = msg.getProperties();
 
                 String parts[] = new SubscriptionTopic(deliveryRequest.topicPattern).split();
                 String shareName = parts[1];
@@ -214,25 +217,25 @@ class DestinationListenerWrapper<T> {
 
                 if (payloadBytes != null) {
                     if (malformedReason == null) {
-                        BytesDeliveryImpl delivery = new BytesDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, ByteBuffer.wrap(payloadBytes), properties, autoConfirm ? null : deliveryRequest);
+                        BytesDeliveryImpl delivery = new BytesDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, ByteBuffer.wrap(payloadBytes), properties, applicationProperties, autoConfirm ? null : deliveryRequest);
                         listener.onMessage(client, context, delivery);
                     } else {
                         MalformedDeliveryImpl delivery = new MalformedDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, ByteBuffer.wrap(payloadBytes),
-                                properties, autoConfirm ? null : deliveryRequest, malformedReason, malformedDescription, malformedMQMDFormat, malformedMQMDCCSID);
+                                properties, applicationProperties, autoConfirm ? null : deliveryRequest, malformedReason, malformedDescription, malformedMQMDFormat, malformedMQMDCCSID);
                         listener.onMalformed(client, context, delivery);
                     }
                 } else {
                     if (malformedReason == null) {
                         Delivery delivery;
                         if (payloadIsJson) {
-                            delivery = new JsonDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, payloadString, gsonBuilder, properties, autoConfirm ? null : deliveryRequest);
+                            delivery = new JsonDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, payloadString, gsonBuilder, properties, applicationProperties, autoConfirm ? null : deliveryRequest);
                         } else {
-                            delivery = new StringDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, payloadString, properties, autoConfirm ? null : deliveryRequest);
+                            delivery = new StringDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, payloadString, properties, applicationProperties, autoConfirm ? null : deliveryRequest);
                         }
                         listener.onMessage(client, context, delivery);
                     } else {
                         MalformedDeliveryImpl delivery = new MalformedDeliveryImpl(client, qos, shareName, topic, topicPattern, ttl, ByteBuffer.wrap(payloadString.getBytes(Charset.forName("UTF-8"))),
-                                properties, autoConfirm ? null : deliveryRequest, malformedReason, malformedDescription, malformedMQMDFormat, malformedMQMDCCSID);
+                                properties, applicationProperties, autoConfirm ? null : deliveryRequest, malformedReason, malformedDescription, malformedMQMDFormat, malformedMQMDCCSID);
                         listener.onMalformed(client, context, delivery);
                     }
                 }

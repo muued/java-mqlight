@@ -207,8 +207,8 @@ public class TestDestinationListenerWrapper {
         DestinationListenerWrapper<Object> wrapper = new DestinationListenerWrapper<Object>(expectedClient, new GsonBuilder(), listener, expectedContext);
         wrapper.onDelivery(callbackService, request, expectedQos, false);
 
-        assertNotNull("Properties should not have been null!", listener.actualDelivery.getProperties());
-        assertEquals("Expected no message properties", 0, listener.actualDelivery.getProperties().size());
+        assertNotNull("ApplicationProperties should not have been null!", listener.actualDelivery.getApplicationProperties());
+        assertEquals("Expected no message ApplicationProperties", 0, listener.actualDelivery.getApplicationProperties().size());
         assertEquals("Expected QOS to match", expectedQos, listener.actualDelivery.getQOS());
         assertEquals("Expected share to match", null, listener.actualDelivery.getShare());
         assertEquals("Expected topic to match", expectedTopic, listener.actualDelivery.getTopic());
@@ -240,8 +240,8 @@ public class TestDestinationListenerWrapper {
         DestinationListenerWrapper<Object> wrapper = new DestinationListenerWrapper<Object>(expectedClient, new GsonBuilder(), listener, expectedContext);
         wrapper.onDelivery(callbackService, request, expectedQos, false);
 
-        assertNotNull("Properties should not have been null!", listener.actualDelivery.getProperties());
-        assertEquals("Expected no message properties", 0, listener.actualDelivery.getProperties().size());
+        assertNotNull("ApplicationProperties should not have been null!", listener.actualDelivery.getApplicationProperties());
+        assertEquals("Expected no message ApplicationProperties", 0, listener.actualDelivery.getApplicationProperties().size());
         assertEquals("Expected QOS to match", expectedQos, listener.actualDelivery.getQOS());
         assertEquals("Expected share to match", null, listener.actualDelivery.getShare());
         assertEquals("Expected topic to match", expectedTopic, listener.actualDelivery.getTopic());
@@ -317,8 +317,8 @@ public class TestDestinationListenerWrapper {
         DestinationListenerWrapper<Object> wrapper = new DestinationListenerWrapper<Object>(expectedClient, new GsonBuilder(), listener, expectedContext);
         wrapper.onDelivery(callbackService, request, expectedQos, false);
 
-        assertNotNull("Properties should not have been null!", listener.actualDelivery.getProperties());
-        assertEquals("Expected no message properties", 0, listener.actualDelivery.getProperties().size());
+        assertNotNull("ApplicationProperties should not have been null!", listener.actualDelivery.getApplicationProperties());
+        assertEquals("Expected no message ApplicationProperties", 0, listener.actualDelivery.getApplicationProperties().size());
         assertEquals("Expected QOS to match", expectedQos, listener.actualDelivery.getQOS());
         assertEquals("Expected share to match", null, listener.actualDelivery.getShare());
         assertEquals("Expected topic to match", expectedTopic, listener.actualDelivery.getTopic());
@@ -372,8 +372,8 @@ public class TestDestinationListenerWrapper {
         DestinationListenerWrapper<Object> wrapper = new DestinationListenerWrapper<Object>(expectedClient, new GsonBuilder(), listener, expectedContext);
         wrapper.onDelivery(callbackService, request, expectedQos, false);
 
-        assertNotNull("Properties should not have been null!", listener.actualDelivery.getProperties());
-        assertEquals("Expected no message properties", 0, listener.actualDelivery.getProperties().size());
+        assertNotNull("ApplicationProperties should not have been null!", listener.actualDelivery.getApplicationProperties());
+        assertEquals("Expected no message ApplicationProperties", 0, listener.actualDelivery.getApplicationProperties().size());
         assertEquals("Expected QOS to match", expectedQos, listener.actualDelivery.getQOS());
         assertEquals("Expected share to match", null, listener.actualDelivery.getShare());
         assertEquals("Expected topic to match", expectedTopic, listener.actualDelivery.getTopic());

@@ -30,6 +30,7 @@ import com.ibm.mqlight.api.QOS;
 import com.ibm.mqlight.api.impl.engine.DeliveryRequest;
 import com.ibm.mqlight.api.logging.Logger;
 import com.ibm.mqlight.api.logging.LoggerFactory;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 public class JsonDeliveryImpl extends DeliveryImpl implements JsonDelivery {
 
@@ -44,8 +45,8 @@ public class JsonDeliveryImpl extends DeliveryImpl implements JsonDelivery {
     protected JsonDeliveryImpl(NonBlockingClientImpl client, QOS qos,
                                String share, String topic, String topicPattern, long ttl,
                                String data, GsonBuilder gsonBuilder,
-                               Map<String, Object> properties, DeliveryRequest deliveryRequest) {
-        super(client, qos, share, topic, topicPattern, ttl, properties, deliveryRequest);
+                               Properties properties, Map<String, Object> applicationProperties, DeliveryRequest deliveryRequest) {
+        super(client, qos, share, topic, topicPattern, ttl, properties, applicationProperties, deliveryRequest);
 
         final String methodName = "<init>";
         logger.entry(this, methodName, client, qos, share, topic, topicPattern, ttl, data, gsonBuilder, properties, deliveryRequest);

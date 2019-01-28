@@ -26,6 +26,7 @@ import com.ibm.mqlight.api.QOS;
 import com.ibm.mqlight.api.impl.engine.DeliveryRequest;
 import com.ibm.mqlight.api.logging.Logger;
 import com.ibm.mqlight.api.logging.LoggerFactory;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 public class MalformedDeliveryImpl extends BytesDeliveryImpl implements MalformedDelivery {
 
@@ -37,9 +38,10 @@ public class MalformedDeliveryImpl extends BytesDeliveryImpl implements Malforme
     private final int ccsid;
 
     protected MalformedDeliveryImpl(NonBlockingClientImpl client, QOS qos, String shareName, String topic, String topicPattern, long ttl,
-                                    ByteBuffer data, Map<String, Object> properties, DeliveryRequest req, MalformedReason reason,
+                                    ByteBuffer data, Properties properties,
+                                    Map<String, Object> applicationProperties, DeliveryRequest req, MalformedReason reason,
                                     String malformedDescription, String malformedMQMDFormat, int malformedMQMDCCSID) {
-        super(client, qos, shareName, topic, topicPattern, ttl, data, properties, req);
+        super(client, qos, shareName, topic, topicPattern, ttl, data, properties, applicationProperties, req);
 
         final String methodName = "<init>";
         logger.entry(this, methodName, client, qos, shareName, topic, topicPattern, ttl, data, properties, req, reason, malformedDescription, malformedMQMDFormat, malformedMQMDCCSID);

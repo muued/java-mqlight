@@ -26,6 +26,7 @@ import java.util.Map;
 
 import junit.framework.AssertionFailedError;
 
+import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.junit.Test;
 
 import com.google.gson.GsonBuilder;
@@ -73,8 +74,9 @@ public class TestDeliveryImpl {
 
         protected MockDelivery(NonBlockingClientImpl client, QOS qos,
                                String share, String topic, String topicPattern, long ttl,
-                               Map<String, Object> properties, DeliveryRequest deliveryRequest) {
-            super(client, qos, share, topic, topicPattern, ttl, properties, deliveryRequest);
+                               Properties properties, Map<String, Object> applicationProperties,
+                               DeliveryRequest deliveryRequest) {
+            super(client, qos, share, topic, topicPattern, ttl, properties, applicationProperties, deliveryRequest);
         }
 
         @Override
@@ -92,25 +94,27 @@ public class TestDeliveryImpl {
         String expectedTopic = "topic";
         String expectedTopicPattern = "topicPattern";
         long expectedTtl = 5;
-        HashMap<String, Object> expectedProperties = new HashMap<>();
+        Properties expectedProperties = new Properties();
+        Map<String, Object> expectedApplicationProperties = new HashMap<>();
         DeliveryRequest deliveryRequest = new DeliveryRequest(null, null, null, null, null);
 
         MockDelivery delivery =
-                new MockDelivery(client, expectedQos, expectedShare, expectedTopic, expectedTopicPattern, expectedTtl, expectedProperties, deliveryRequest);
+                new MockDelivery(client, expectedQos, expectedShare, expectedTopic, expectedTopicPattern, expectedTtl, expectedProperties, expectedApplicationProperties, deliveryRequest);
 
-        assertEquals("properties", expectedProperties, delivery.getProperties());
+        assertEquals("applicationProperties", expectedApplicationProperties, delivery.getApplicationProperties());
         assertEquals("qos", expectedQos, delivery.getQOS());
         assertEquals("share", expectedShare, delivery.getShare());
         assertEquals("topic", expectedTopic, delivery.getTopic());
         assertEquals("topicPattern", expectedTopicPattern, delivery.getTopicPattern());
         assertEquals("ttl", expectedTtl, delivery.getTtl());
+        // FIXME: add properties check
     }
 
     @Test
     public void confirmWhenAutoConfirm() {
         MockClient client = new MockClient(true);
         MockDelivery delivery =
-                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, null);
+                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, null, null);
         try {
             delivery.confirm();
             fail("Expected StateException to be thrown");
@@ -118,26 +122,26 @@ public class TestDeliveryImpl {
             // Expected: delivery was qos=0
         }
     }
-    
+
     @Test
     public void confirmWhenQos0() {
         MockClient client = new MockClient(true);
         MockDelivery delivery =
-                new MockDelivery(client, QOS.AT_MOST_ONCE, null, "topic", "topic", 0, null, null);
+                new MockDelivery(client, QOS.AT_MOST_ONCE, null, "topic", "topic", 0, null,null, null);
         try {
             delivery.confirm();
             fail("Expected StateException to be thrown");
         } catch(StateException e) {
             // Expected: delivery was auto-confirm...
         }
-    }    
+    }
 
     @Test
     public void confirmSuccessful() {
         MockClient client = new MockClient(true);
         DeliveryRequest deliveryRequest = new DeliveryRequest(null, null, null, null, null);
         MockDelivery delivery =
-                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, deliveryRequest);
+                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, null, deliveryRequest);
         delivery.confirm();
     }
 
@@ -146,7 +150,7 @@ public class TestDeliveryImpl {
         MockClient client = new MockClient(false);
         DeliveryRequest deliveryRequest = new DeliveryRequest(null, null, null, null, null);
         MockDelivery delivery =
-                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, deliveryRequest);
+                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, null, deliveryRequest);
         try {
             delivery.confirm();
             fail("Expected StateException to be thrown");
@@ -160,7 +164,7 @@ public class TestDeliveryImpl {
         MockClient client = new MockClient(true);
         DeliveryRequest deliveryRequest = new DeliveryRequest(null, null, null, null, null);
         MockDelivery delivery =
-                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, deliveryRequest);
+                new MockDelivery(client, QOS.AT_LEAST_ONCE, null, "topic", "topic", 0, null, null, deliveryRequest);
         delivery.confirm();
         try {
             delivery.confirm();

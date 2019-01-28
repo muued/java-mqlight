@@ -24,14 +24,16 @@ import java.util.Map;
 import com.ibm.mqlight.api.BytesDelivery;
 import com.ibm.mqlight.api.QOS;
 import com.ibm.mqlight.api.impl.engine.DeliveryRequest;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 class BytesDeliveryImpl extends DeliveryImpl implements BytesDelivery {
 
     private final ByteBuffer data;
     
     protected BytesDeliveryImpl(NonBlockingClientImpl client, QOS qos, String shareName, String topic, 
-                                String topicPattern, long ttl, ByteBuffer data, Map<String, Object> properties, DeliveryRequest req) {
-        super(client, qos, shareName, topic, topicPattern, ttl, properties, req);
+                                String topicPattern, long ttl, ByteBuffer data, Properties properties,
+                                Map<String, Object> applicationProperties, DeliveryRequest req) {
+        super(client, qos, shareName, topic, topicPattern, ttl, properties, applicationProperties, req);
         this.data = data;
     }
     

@@ -26,6 +26,7 @@ import com.ibm.mqlight.api.StateException;
 import com.ibm.mqlight.api.impl.engine.DeliveryRequest;
 import com.ibm.mqlight.api.logging.Logger;
 import com.ibm.mqlight.api.logging.LoggerFactory;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 
 public abstract class DeliveryImpl implements Delivery {
 
@@ -37,11 +38,13 @@ public abstract class DeliveryImpl implements Delivery {
     private final String topic;
     private final String topicPattern;
     private final long ttl;
-    private final Map<String, Object> properties;
+    private final Properties properties;
+    private final Map<String, Object> applicationProperties;
     private final DeliveryRequest deliveryRequest;
     private boolean confirmed = false;
 
-    protected DeliveryImpl(NonBlockingClientImpl client, QOS qos, String share, String topic, String topicPattern, long ttl, Map<String, Object> properties, DeliveryRequest deliveryRequest) {
+    protected DeliveryImpl(NonBlockingClientImpl client, QOS qos, String share, String topic, String topicPattern, long ttl, Properties properties,
+            Map<String, Object> applicationProperties, DeliveryRequest deliveryRequest) {
         final String methodName = "<init>";
         logger.entry(this, methodName, client, qos, share, topic, topicPattern, ttl, properties, deliveryRequest);
 
@@ -52,6 +55,7 @@ public abstract class DeliveryImpl implements Delivery {
         this.topicPattern = topicPattern;
         this.ttl = ttl;
         this.properties = properties;
+        this.applicationProperties = applicationProperties;
         this.deliveryRequest = deliveryRequest;
 
         logger.exit(this, methodName);
@@ -112,7 +116,12 @@ public abstract class DeliveryImpl implements Delivery {
     }
 
     @Override
-    public Map<String, Object> getProperties() {
+    public Properties getProperties() {
         return properties;
+    }
+
+    @Override
+    public Map<String, Object> getApplicationProperties() {
+        return applicationProperties;
     }
 }

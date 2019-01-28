@@ -464,10 +464,10 @@ public class TestNonBlockingClientImpl {
             }
         }
         class TestDestinationListener implements DestinationListener<Void> {
-            protected Map<String, Object> properties = null;
+            protected Map<String, Object> applicationProperties = null;
             @Override
             public void onMessage(NonBlockingClient client, Void context, Delivery delivery) {
-                properties = delivery.getProperties();
+                applicationProperties = delivery.getApplicationProperties();
             }
             @Override
             public void onMalformed(NonBlockingClient client, Void context, MalformedDelivery delivery) {
@@ -503,9 +503,9 @@ public class TestNonBlockingClientImpl {
         DestinationListenerWrapper<Void> wrapper = new DestinationListenerWrapper<>(client, new GsonBuilder(), destinationListener, null);
         wrapper.onDelivery(new SameThreadCallbackService(), dr, QOS.AT_MOST_ONCE, false);
 
-        assertNotNull("Expected onMessage to have been called with message properties", destinationListener.properties);
-        assertEquals("Expected all message properties to have been round-tripped", props.size(), destinationListener.properties.size());
-        Map<String, Object> actualProperties = destinationListener.properties;
+        assertNotNull("Expected onMessage to have been called with message applicationProperties", destinationListener.applicationProperties);
+        assertEquals("Expected all message applicationProperties to have been round-tripped", props.size(), destinationListener.applicationProperties.size());
+        Map<String, Object> actualProperties = destinationListener.applicationProperties;
         for (Map.Entry<String, Object> expectedProperty : props.entrySet()) {
             assertTrue("Round-tripped properties should have contained key: "+expectedProperty.getKey(), actualProperties.containsKey(expectedProperty.getKey()));
             if (expectedProperty.getValue() instanceof Byte[]) {
