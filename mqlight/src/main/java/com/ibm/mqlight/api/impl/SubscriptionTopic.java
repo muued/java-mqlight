@@ -78,7 +78,7 @@ public class SubscriptionTopic {
         topicPattern = share.substring(share.indexOf(':')+1);
         share = share.substring(0, share.indexOf(':'));
     } else {
-        topicPattern = topic.substring("private:".length());
+        topicPattern = topic;
         share = null;
     }
 
