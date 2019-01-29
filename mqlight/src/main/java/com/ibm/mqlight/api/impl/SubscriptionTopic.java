@@ -35,7 +35,7 @@ public class SubscriptionTopic {
 
     String subTopic;
     if (shareName == null || "".equals(shareName)) {
-        subTopic = "private:" + topicPattern;
+        subTopic = topicPattern;
         shared = false;
     } else {
         if (shareName.contains(":")) {
